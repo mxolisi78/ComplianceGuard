@@ -1,5 +1,4 @@
-$readme = @'
-# ComplianceGuard — Multi-Agent Contract Review
+﻿# ComplianceGuard — Multi-Agent Contract Review
 
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-1.0-FF6F61)
@@ -128,5 +127,3 @@ Mxolisi Maseko
 
 - GitHub: @mxolisi78
 - LinkedIn: Mxolisi Maseko
-'@
-$readme | Out-File -FilePath README.md -Encoding utf8
