@@ -1,0 +1,8 @@
+﻿{% extends "reviews/base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Review not found</h2>
+  <p>The review you're looking for doesn't exist.</p>
+  <p><a href="{% url 'home' %}">← Back to reviews</a></p>
+</div>
+{% endblock %}

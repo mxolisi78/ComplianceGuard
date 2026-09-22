@@ -1,0 +1,54 @@
+﻿{% extends "reviews/base.html" %}
+{% block content %}
+
+{% if error %}
+  <div class="card" style="background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b;">
+    <strong>Error:</strong> {{ error }}
+  </div>
+{% endif %}
+<div class="card">
+  <h2>Start a new review</h2>
+  <form method="post" action="{% url 'start' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p style="color: var(--muted); font-size: 13px;">Paste text or upload a PDF/DOCX/TXT file.</p>
+    <textarea name="document_text" placeholder="Paste the contract text here..."></textarea>
+    <div class="row" style="margin-top: 12px;">
+      <input type="file" name="document_file" accept=".pdf,.docx,.txt,.md">
+      <button type="submit">Run Compliance Review</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>All reviews</h2>
+  {% if reviews %}
+    <ul class="review-list">
+      {% for r in reviews %}
+        <li>
+          <div>
+            <a href="{% url 'review_detail' r.thread_id %}">{{ r.thread_id }}</a>
+            <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+              {{ r.preview }}
+            </div>
+          </div>
+          <div>
+            <span style="font-size: 12px; margin-right: 8px; color: var(--muted);">{{ r.doc_type }}</span>
+            {% if r.approval == 'approved' %}
+              <span class="badge badge-approved">Approved</span>
+            {% elif r.approval == 'rejected' %}
+              <span class="badge badge-rejected">Rejected</span>
+            {% elif r.is_paused %}
+              <span class="badge badge-paused">Pending Review</span>
+            {% elif r.is_complete %}
+              <span class="badge badge-complete">Complete</span>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p style="color: var(--muted);">No reviews yet. Start one above.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

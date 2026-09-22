@@ -1,0 +1,52 @@
+[
+  {
+    "id": "PAY-1",
+    "category": "payment_terms",
+    "text": "Payment terms must not exceed 60 days from invoice date. Standard is Net 30."
+  },
+  {
+    "id": "PAY-2",
+    "category": "payment_terms",
+    "text": "Late payment penalties must be clearly defined and cannot exceed 1.5% per month."
+  },
+  {
+    "id": "LIA-1",
+    "category": "liability",
+    "text": "Liability caps should be limited to the total value of the contract. Unlimited liability is prohibited."
+  },
+  {
+    "id": "LIA-2",
+    "category": "liability",
+    "text": "Indemnification clauses must be mutual, not one-sided. Each party covers its own negligence."
+  },
+  {
+    "id": "TERM-1",
+    "category": "termination",
+    "text": "Either party must be able to terminate for cause with 30 days written notice."
+  },
+  {
+    "id": "TERM-2",
+    "category": "termination",
+    "text": "Termination for convenience requires 60 days notice and is subject to remaining payment obligations."
+  },
+  {
+    "id": "DATA-1",
+    "category": "data_privacy",
+    "text": "All data processing must comply with GDPR and applicable local data protection laws."
+  },
+  {
+    "id": "DATA-2",
+    "category": "data_privacy",
+    "text": "Data breach notification must be reported within 72 hours of discovery."
+  },
+  {
+    "id": "IP-1",
+    "category": "intellectual_property",
+    "text": "Ownership of IP created during the engagement must be explicitly defined in the contract."
+  },
+  {
+    "id": "CONF-1",
+    "category": "confidentiality",
+    "text": "Confidentiality obligations survive for at least 3 years after termination of the agreement."
+  }
+]

@@ -1,0 +1,47 @@
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+*.log
+
+# Data
+data/uploads/*
+data/chroma_db/*
+!data/uploads/.gitkeep
+!data/rules/.gitkeep
+!data/chroma_db/.gitkeep
+
+# LangGraph checkpoint DB
+*.sqlite
+*.sqlite3
+
+# Test scripts
+scripts/
+test_*.py
+test_*.txt
+
+# VS Code
+.vscode/
+
+# Environment — NEVER commit
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+# Additional exclusions
+data/checkpoints.sqlite
+*.sqlite
+*.sqlite3
+test_*.py
+test_*.txt

@@ -1,0 +1,77 @@
+﻿{% extends "reviews/base.html" %}
+{% block title %}Review {{ thread_id }} — ComplianceGuard{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>Review {{ thread_id }}</h2>
+  <p>
+    <strong>Document type:</strong> {{ values.doc_type }} &nbsp;·&nbsp;
+    <strong>Findings:</strong> {{ values.findings|length }}
+  </p>
+</div>
+
+<div class="card">
+  <h2>Compliance report</h2>
+  <div class="report">{{ report_html|safe }}</div>
+</div>
+
+{% if state.is_paused %}
+  <div class="card interrupt-panel">
+    <h3>⏸ Awaiting your decision</h3>
+    <p>The compliance agent has produced the report above. Please review and choose:</p>
+
+    <label style="display:block; margin-top: 12px; font-weight: 500;">Reviewer notes (optional)</label>
+    <textarea id="notes" class="notes" placeholder="e.g. Escalated to legal, 2026-09-22"></textarea>
+
+    <div class="actions">
+      <button class="approve" onclick="decide('approved')">✓ Approve</button>
+      <button class="reject" onclick="decide('rejected')">✗ Reject</button>
+    </div>
+    <div id="status" class="status-msg"></div>
+  </div>
+{% elif values.approval %}
+  <div class="card">
+    <h2>Human decision</h2>
+    <p>
+      <span class="badge {% if values.approval == 'approved' %}badge-approved{% else %}badge-rejected{% endif %}">
+        {{ values.approval|title }}
+      </span>
+      {% if values.approver_notes %}
+        <p style="margin-top: 12px;"><em>{{ values.approver_notes }}</em></p>
+      {% endif %}
+    </p>
+    <p style="margin-top: 16px;"><a href="{% url 'home' %}">← Back to reviews</a></p>
+  </div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const threadId = "{{ thread_id }}";
+const csrf = "{{ csrf_token }}";
+
+async function decide(approval) {
+  const notes = document.getElementById('notes').value;
+  const status = document.getElementById('status');
+  status.textContent = 'Submitting…';
+
+  try {
+    const res = await fetch(`/review/${threadId}/decide/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrf,
+      },
+      body: JSON.stringify({ approval, notes }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+    status.textContent = `Saved: ${data.approval}. Reloading…`;
+    setTimeout(() => window.location.reload(), 800);
+  } catch (err) {
+    status.textContent = 'Error: ' + err.message;
+  }
+}
+</script>
+{% endblock %}
