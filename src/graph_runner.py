@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import Optional
 
 from langgraph.types import Command
-from langgraph.checkpoint.sqlite import SqliteSaver
+# from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.memory import MemorySaver
 
 from agents.supervisor_hitl import build_hitl_graph
 from src.config import PROJECT_ROOT
@@ -22,7 +23,8 @@ CHECKPOINT_DB = PROJECT_ROOT / "data" / "checkpoints.sqlite"
 CHECKPOINT_DB.parent.mkdir(parents=True, exist_ok=True)
 
 # One shared checkpointer + compiled graph
-_checkpointer_ctx = SqliteSaver.from_conn_string(str(CHECKPOINT_DB))
+#_checkpointer_ctx = SqliteSaver.from_conn_string(str(CHECKPOINT_DB))
+_checkpointer = MemorySaver()
 _checkpointer = _checkpointer_ctx.__enter__()   # keep it open for process lifetime
 _graph = build_hitl_graph(checkpointer=_checkpointer)
 
