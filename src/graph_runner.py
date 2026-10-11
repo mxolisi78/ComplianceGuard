@@ -1,32 +1,31 @@
-"""
+﻿"""
 Wrapper around the HITL supervisor graph.
 
 Provides a Django-friendly interface:
-  - start_review(document)  → returns thread_id
-  - get_state(thread_id)    → current status + payload
-  - resume_review(thread_id, approval, notes) → completes the run
-  - list_reviews()          → all threads and their states
+  - start_review(document)  -> returns thread_id
+  - get_state(thread_id)    -> current status + payload
+  - resume_review(thread_id, approval, notes) -> completes the run
+  - list_reviews()          -> all threads and their states
+
+Uses MemorySaver (in-memory) — reviews do NOT persist across restarts.
+Suitable for the free-tier deploy. Swap to SqliteSaver (with a persistent
+disk) for persistent deployments.
 """
 import uuid
-from pathlib import Path
 from typing import Optional
 
 from langgraph.types import Command
-# from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.checkpoint.memory import MemorySaver
 
 from agents.supervisor_hitl import build_hitl_graph
-from src.config import PROJECT_ROOT
 
 
-CHECKPOINT_DB = PROJECT_ROOT / "data" / "checkpoints.sqlite"
-CHECKPOINT_DB.parent.mkdir(parents=True, exist_ok=True)
-
-# One shared checkpointer + compiled graph
-#_checkpointer_ctx = SqliteSaver.from_conn_string(str(CHECKPOINT_DB))
+# In-memory checkpointer — shared for the process lifetime
 _checkpointer = MemorySaver()
-_checkpointer = _checkpointer_ctx.__enter__()   # keep it open for process lifetime
 _graph = build_hitl_graph(checkpointer=_checkpointer)
+
+# Track known thread_ids ourselves (MemorySaver doesn't expose a list API)
+_known_threads = []
 
 
 def start_review(document: str) -> str:
@@ -34,17 +33,23 @@ def start_review(document: str) -> str:
     thread_id = f"review-{uuid.uuid4().hex[:12]}"
     config = {"configurable": {"thread_id": thread_id}}
     _graph.invoke({"document": document}, config=config)
+    _known_threads.append(thread_id)
     return thread_id
 
 
 def get_state(thread_id: str) -> Optional[dict]:
     """Return the current state of a review (paused or completed)."""
     config = {"configurable": {"thread_id": thread_id}}
-    snapshot = _graph.get_state(config)
+    try:
+        snapshot = _graph.get_state(config)
+    except Exception:
+        return None
+
     if not snapshot or not snapshot.values:
         return None
 
     values = dict(snapshot.values)
+
     # Extract interrupt payload if the graph is currently paused
     interrupt_payload = None
     for task in snapshot.tasks:
@@ -74,14 +79,5 @@ def resume_review(thread_id: str, approval: str, notes: str = "") -> dict:
 
 
 def list_reviews():
-    """List all thread_ids we've seen in the checkpoint DB."""
-    # SqliteSaver doesn't expose a simple list API, so we query the DB directly
-    import sqlite3
-    con = sqlite3.connect(str(CHECKPOINT_DB))
-    try:
-        cur = con.execute("SELECT DISTINCT thread_id FROM checkpoints ORDER BY rowid DESC")
-        return [row[0] for row in cur.fetchall()]
-    except sqlite3.OperationalError:
-        return []
-    finally:
-        con.close()
+    """List all thread_ids we've seen in this process."""
+    return list(reversed(_known_threads))
